@@ -31,7 +31,8 @@ public class Utils {
         throw new UnsupportedOperationException();
     }
 
-    public static void saveNewsInDB(final Content newsContent, final Context context) throws IOException {
+    public static void saveNewsInDB(final Content newsContent,
+                                    final Context context) throws IOException {
         final AppDataBase appDataBase = AppDataBase.getAppDatabase(context);
         final News newsForSave = new News();
         newsForSave.setNewsTitle(newsContent.getWebTitle());
@@ -45,7 +46,6 @@ public class Utils {
     public static boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivity =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
         if (null == connectivity) {
             return false;
         } else {
@@ -61,7 +61,8 @@ public class Utils {
         return false;
     }
 
-    private static void getImageBytes(final News newsForSave, final String thumbnailUrl) throws IOException {
+    private static void getImageBytes(final News newsForSave,
+                                      final String thumbnailUrl) throws IOException {
         final OkHttpClient client = new OkHttpClient();
         final Request request = new Request.Builder()
                 .url(thumbnailUrl)

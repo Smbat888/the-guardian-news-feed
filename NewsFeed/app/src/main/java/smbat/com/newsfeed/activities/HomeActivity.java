@@ -1,8 +1,12 @@
 package smbat.com.newsfeed.activities;
 
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,7 +29,10 @@ import smbat.com.newsfeed.adapters.NewsAdapter;
 import smbat.com.newsfeed.api.models.Result;
 import smbat.com.newsfeed.database.entities.News;
 import smbat.com.newsfeed.providers.NewsDataProvider;
+import smbat.com.newsfeed.services.NewsService;
 import smbat.com.newsfeed.utils.Utils;
+
+import static smbat.com.newsfeed.services.NewsService.NEWS_LOADED_INTENT_ACTION;
 
 public class HomeActivity extends AppCompatActivity implements NewsDataProvider.NewsCallback,
         NewsDataProvider.PinnedNewsCallback, NewsDataProvider.NewsFromDBCallback {
@@ -49,6 +56,15 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
     private NewsDataProvider dataProvider;
     private RecyclerView.LayoutManager layoutManager;
 
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Utils.isNetworkAvailable(HomeActivity.this)) {
+                dataProvider.loadNews(HomeActivity.this);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +74,7 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         initializeDataProvider();
         initializeNewsListView();
         initializePinnedNewsListView();
-        pinnedNewsRecyclerView.setVisibility(View.VISIBLE);
+        startNewsService();
     }
 
     @Override
@@ -108,10 +124,18 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
     @Override
     protected void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(HomeActivity.this).registerReceiver(
+                broadcastReceiver, new IntentFilter(NEWS_LOADED_INTENT_ACTION));
         if (Utils.isNetworkAvailable(this)) {
             pinnedList.clear();
             dataProvider.loadPinnedNews(this, this);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        super.onPause();
     }
 
     @Override
@@ -132,6 +156,11 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
             return;
         }
         dataProvider.loadNewsFromDB(this, new SoftReference<Context>(this));
+    }
+
+    private void startNewsService() {
+        final Intent intent = new Intent(this, NewsService.class);
+        startService(intent);
     }
 
     private void initializeNewsListView() {
@@ -195,10 +224,6 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
     }
 
     private RecyclerView.OnScrollListener recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            super.onScrollStateChanged(recyclerView, newState);
-        }
 
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -217,7 +242,6 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
             if((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                     && firstVisibleItemPosition >= 0
                     && totalItemCount >= PAGE_SIZE) {
-                // TODO - dataProvider.loadNews*(...)
                 dataProvider.loadNews(HomeActivity.this);
             }
         }
