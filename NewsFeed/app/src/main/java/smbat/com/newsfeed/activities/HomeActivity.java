@@ -74,6 +74,7 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_view_list) {
             if (isInGridMode) {
+                layoutManager = new LinearLayoutManager(this);
                 newsRecyclerView.setLayoutManager(layoutManager);
                 item.setIcon(R.drawable.ic_list);
                 isInGridMode = false;
