@@ -7,6 +7,7 @@ import java.util.List;
 import smbat.com.newsfeed.api.models.Content;
 import smbat.com.newsfeed.api.models.Result;
 import smbat.com.newsfeed.database.entities.News;
+import smbat.com.newsfeed.tasks.LoadNewsDetailFromDBTask;
 import smbat.com.newsfeed.tasks.LoadNewsDetailTask;
 import smbat.com.newsfeed.tasks.LoadNewsFromDBTask;
 import smbat.com.newsfeed.tasks.LoadNewsTask;
@@ -47,6 +48,11 @@ public class NewsDataProvider {
         new LoadNewsDetailTask(callback, context, apiUrl).execute();
     }
 
+    public void loadNewsDetailFromDB(final DetailNewsFromDBCallback callback, final Context context,
+                                     final int newsId) {
+        new LoadNewsDetailFromDBTask(callback, context, newsId).execute();
+    }
+
     public void loadPinnedNews(final PinnedNewsCallback callback, final Context context) {
         new LoadPinnedNewsTask(callback, context).execute();
     }
@@ -65,6 +71,10 @@ public class NewsDataProvider {
 
     public interface NewsFromDBCallback {
         void onNewsLoadedFromDB(List<News> newsList);
+    }
+
+    public interface DetailNewsFromDBCallback {
+        void onNewsDetailLoadedFromDB(News singleNews);
     }
 
 }

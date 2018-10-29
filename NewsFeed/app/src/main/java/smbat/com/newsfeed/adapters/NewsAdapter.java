@@ -25,54 +25,53 @@ import smbat.com.newsfeed.R;
 import smbat.com.newsfeed.activities.HomeActivity;
 import smbat.com.newsfeed.activities.NewsDetailActivity;
 import smbat.com.newsfeed.api.models.Result;
+import smbat.com.newsfeed.database.AppDataBase;
 import smbat.com.newsfeed.utils.Utils;
 
-public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder> implements Filterable {
+public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsViewHolder> implements Filterable {
 
     public static final String CURRENT_ITEM_API_URL = "smbat.com.newsfeed.adapters.CURRENT_ITEM_API_URL";
+    public static final String CURRENT_ITEM_ID = "smbat.com.newsfeed.adapters.CURRENT_ITEM_ID";
 
     private static final String IMAGE_TRANSITION_NAME = "newsImage";
     private static final String TEXT_TRANSITION_NAME = "newsTitle";
+    private static final int VIEW_TYPE_PINNED_NEWS = 1;
+    private static final int VIEW_TYPE_NEWS = 0;
 
     private final Context context;
     private final List<Result> newsList;
+    private final boolean pinned;
     private List<Result> newsListFiltered;
 
-    public NewsAdapter(final Context context, final List<Result> newsList) {
+    public NewsAdapter(final Context context, final List<Result> newsList, final boolean pinned) {
         this.context = context;
         this.newsList = newsList;
         newsListFiltered = newsList;
+        this.pinned = pinned;
+    }
+
+    public NewsAdapter(final Context context, final List<Result> newsList) {
+        this(context, newsList, false);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return pinned ? VIEW_TYPE_PINNED_NEWS : VIEW_TYPE_NEWS;
     }
 
     @NonNull
     @Override
-    public NewsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new NewsViewHolder(LayoutInflater.from(parent.getContext()), parent);
+    public PinnedNewsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (VIEW_TYPE_NEWS == viewType) {
+            return new NewsViewHolder(LayoutInflater.from(parent.getContext()), parent);
+        }
+        return new PinnedNewsViewHolder(LayoutInflater.from(parent.getContext()), parent);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull PinnedNewsViewHolder holder, int position) {
         final Result news = newsListFiltered.get(position);
-        holder.newsTitle.setText(news.getWebTitle());
-        final String category = news.getSectionName();
-        holder.newsCategory.setText(category);
-        bindImage(holder, news);
-
-        holder.itemView.setOnClickListener(getOnItemClickListener(holder, news.getApiUrl()));
-    }
-
-    private void bindImage(final NewsViewHolder holder, final Result news) {
-        if (null == news.getFields()) {
-            if (null != news.getImageBytes()) {
-                holder.newsImage.setImageBitmap(Utils.getBitmapFromBytes(news.getImageBytes()));
-            }
-            return;
-        }
-        final String thumbnailImage = news.getFields().getThumbnail();
-        Picasso.get()
-                .load(thumbnailImage)
-                .placeholder(R.drawable.news_image_placeholder)
-                .into(holder.newsImage);
+        holder.bind(news);
     }
 
     @Override
@@ -110,7 +109,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         };
     }
 
-    static class NewsViewHolder extends RecyclerView.ViewHolder {
+    class NewsViewHolder extends PinnedNewsViewHolder {
 
         @BindView(R.id.news_title)
         TextView newsTitle;
@@ -124,17 +123,55 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
             ButterKnife.bind(this, itemView);
         }
 
+        void bind(final Result news) {
+            super.bind(news);
+            newsCategory.setText(news.getSectionName());
+        }
+
     }
+
+    class PinnedNewsViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.news_title)
+        TextView newsTitle;
+        @BindView(R.id.news_image)
+        ImageView newsImage;
+
+        PinnedNewsViewHolder(final LayoutInflater inflater, final ViewGroup parent) {
+            super(inflater.inflate(R.layout.pinned_news_item, parent, false));
+            ButterKnife.bind(this, itemView);
+        }
+
+        PinnedNewsViewHolder(View inflate) {
+            super(inflate);
+            ButterKnife.bind(this, itemView);
+        }
+
+        void bind(final Result news) {
+            newsTitle.setText(news.getWebTitle());
+            bindImage(this, news);
+            itemView.setOnClickListener(getOnItemClickListener(this, news.getApiUrl()));
+        }
+    }
+
 
     /* Helper Methods */
 
-    private View.OnClickListener getOnItemClickListener(final NewsViewHolder holder,
+    private View.OnClickListener getOnItemClickListener(final PinnedNewsViewHolder holder,
                                                         final String apiUrl) {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final Intent intent = new Intent(context, NewsDetailActivity.class);
-                intent.putExtra(CURRENT_ITEM_API_URL, apiUrl);
+                if (Utils.isNetworkAvailable(context)) {
+                    intent.putExtra(CURRENT_ITEM_API_URL, apiUrl);
+                } else {
+                    final String title =
+                            newsListFiltered.get(holder.getAdapterPosition()).getWebTitle();
+                    final AppDataBase appDataBase = AppDataBase.getAppDatabase(context);
+                    final int newsId = appDataBase.newsDao().getNewsIdByTitle(title);
+                    intent.putExtra(CURRENT_ITEM_ID, newsId);
+                }
                 final Pair<View, String> pairImage =
                         Pair.create((View) holder.newsImage, IMAGE_TRANSITION_NAME);
                 final Pair<View, String> pairTitle =
@@ -145,5 +182,19 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
                 context.startActivity(intent, optionsCompat.toBundle());
             }
         };
+    }
+
+    private void bindImage(final PinnedNewsViewHolder holder, final Result news) {
+        if (null == news.getFields()) {
+            if (null != news.getImageBytes()) {
+                holder.newsImage.setImageBitmap(Utils.getBitmapFromBytes(news.getImageBytes()));
+            }
+            return;
+        }
+        final String thumbnailImage = news.getFields().getThumbnail();
+        Picasso.get()
+                .load(thumbnailImage)
+                .placeholder(R.drawable.news_image_placeholder)
+                .into(holder.newsImage);
     }
 }

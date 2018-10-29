@@ -22,4 +22,10 @@ public interface NewsDao {
 
     @Query("Select * FROM news")
     News[] loadAll();
+
+    @Query("SELECT * FROM news WHERE id = :newsId ")
+    News loadNewsById(final int newsId);
+
+    @Query("SELECT id FROM news WHERE news_title = :newsTitle ")
+    int getNewsIdByTitle(final String newsTitle);
 }

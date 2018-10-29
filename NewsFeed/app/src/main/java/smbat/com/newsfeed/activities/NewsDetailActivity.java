@@ -22,11 +22,14 @@ import butterknife.ButterKnife;
 import smbat.com.newsfeed.R;
 import smbat.com.newsfeed.adapters.NewsAdapter;
 import smbat.com.newsfeed.api.models.Content;
+import smbat.com.newsfeed.database.entities.News;
 import smbat.com.newsfeed.providers.NewsDataProvider;
 import smbat.com.newsfeed.utils.Utils;
 
 public class NewsDetailActivity extends AppCompatActivity implements
-        NewsDataProvider.DetailNewsCallback {
+        NewsDataProvider.DetailNewsCallback, NewsDataProvider.DetailNewsFromDBCallback {
+
+    private static final String NO_WEB_CONTENT_HTML = "file:///android_asset/noContent.html";
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -67,11 +70,21 @@ public class NewsDetailActivity extends AppCompatActivity implements
         initializeUI(singleNews);
     }
 
+    @Override
+    public void onNewsDetailLoadedFromDB(News singleNews) {
+        initializeUIFromDB(singleNews);
+    }
+
     /* Helper Methods */
 
     private void initializeDataProvider() {
         final String apiUrl = getIntent().getStringExtra(NewsAdapter.CURRENT_ITEM_API_URL);
+        final int newsId = getIntent().getIntExtra(NewsAdapter.CURRENT_ITEM_ID, 0);
         final NewsDataProvider dataProvider = NewsDataProvider.getInstance();
+        if (null == apiUrl) {
+            dataProvider.loadNewsDetailFromDB(this, this, newsId);
+            return;
+        }
         dataProvider.loadNewsDetail(this, this, apiUrl);
     }
 
@@ -94,6 +107,13 @@ public class NewsDetailActivity extends AppCompatActivity implements
         newsWebContent.getSettings().setJavaScriptEnabled(true);
         newsWebContent.loadUrl(singleNews.getWebUrl());
         handleButtonsClick(singleNews);
+    }
+
+    private void initializeUIFromDB(final News singleNews) {
+        newsImage.setImageBitmap(Utils.getBitmapFromBytes(singleNews.getNewsImage()));
+        newsTitle.setText(singleNews.getNewsTitle());
+        newsDescription.setText(singleNews.getNewsDescription());
+        newsWebContent.loadUrl(NO_WEB_CONTENT_HTML);
     }
 
     private void handleButtonsClick(final Content singleNews) {

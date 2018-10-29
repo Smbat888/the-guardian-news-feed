@@ -81,26 +81,29 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
     public void onNewsLoaded(final List<Result> newsList) {
         initializeNewsListView(newsList);
         progressBar.setVisibility(View.GONE);
+        pinnedNewsRecyclerView.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onNewsLoadedFromDB(List<News> newsList) {
         initializeNewsListViewFromDB(newsList);
+        pinnedNewsRecyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
     }
 
     @Override
     public void onPinnedNewsLoaded(final List<Result> newsList) {
         //initializePinnedNewsListView(newsList);
+        pinnedNewsRecyclerView.setVisibility(View.VISIBLE);
     }
 
     /* Helper Methods */
 
     private void initializeDataProvider() {
         final NewsDataProvider dataProvider = NewsDataProvider.getInstance();
-        // TODO - check network to load corresponding task
         if (Utils.isNetworkAvailable(this)) {
             dataProvider.loadNews(this);
+            // TODO - load pinned news
             dataProvider.loadPinnedNews(this, this);
             return;
         }
@@ -118,7 +121,7 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         pinnedNewsRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                 LinearLayoutManager.HORIZONTAL, false));
         pinnedNewsRecyclerView.setHasFixedSize(true);
-        final NewsAdapter newsAdapter = new NewsAdapter(this, newsList);
+        final NewsAdapter newsAdapter = new NewsAdapter(this, newsList, true);
         pinnedNewsRecyclerView.setAdapter(newsAdapter);
     }
 
