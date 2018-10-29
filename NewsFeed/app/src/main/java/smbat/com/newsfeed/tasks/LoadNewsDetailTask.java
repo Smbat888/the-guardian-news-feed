@@ -1,6 +1,5 @@
 package smbat.com.newsfeed.tasks;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -23,7 +22,7 @@ public class LoadNewsDetailTask extends AsyncTask<Void, Void, Result> {
     private Content newsContent;
 
     public LoadNewsDetailTask(final NewsDataProvider.DetailNewsCallback callback,
-                              final Context context, final String singleNewsAPIUrl) {
+                              final String singleNewsAPIUrl) {
 
         this.callback = callback;
         this.singleNewsAPIUrl = singleNewsAPIUrl;

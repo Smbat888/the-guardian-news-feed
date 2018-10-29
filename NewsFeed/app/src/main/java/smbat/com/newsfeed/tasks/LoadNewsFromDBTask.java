@@ -1,9 +1,9 @@
 package smbat.com.newsfeed.tasks;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import java.lang.ref.SoftReference;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,18 +15,17 @@ import smbat.com.newsfeed.providers.NewsDataProvider;
 public class LoadNewsFromDBTask extends AsyncTask<Void, Void, List<News>> {
 
     private final NewsDataProvider.NewsFromDBCallback callback;
-    @SuppressLint("StaticFieldLeak")
-    private final Context context;
+    private final SoftReference<Context> context;
 
     public LoadNewsFromDBTask(final NewsDataProvider.NewsFromDBCallback callback,
-                              final Context context) {
+                              final SoftReference<Context> context) {
         this.callback = callback;
         this.context = context;
     }
 
     @Override
     protected List<News> doInBackground(Void... voids) {
-        final AppDataBase appDataBase = AppDataBase.getAppDatabase(context);
+        final AppDataBase appDataBase = AppDataBase.getAppDatabase(context.get());
         final News[] allSavedNews = appDataBase.newsDao().loadAll();
         return Arrays.asList(allSavedNews);
     }

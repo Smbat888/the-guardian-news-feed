@@ -2,6 +2,7 @@ package smbat.com.newsfeed.providers;
 
 import android.content.Context;
 
+import java.lang.ref.SoftReference;
 import java.util.List;
 
 import smbat.com.newsfeed.api.models.Content;
@@ -38,16 +39,17 @@ public class NewsDataProvider {
         new LoadNewsTask(callback).execute();
     }
 
-    public void loadNewsFromDB(final NewsFromDBCallback callback, final Context context) {
+    public void loadNewsFromDB(final NewsFromDBCallback callback, final SoftReference<Context> context) {
         new LoadNewsFromDBTask(callback, context).execute();
     }
 
-    public void loadNewsDetail(final DetailNewsCallback callback, final Context context,
+    public void loadNewsDetail(final DetailNewsCallback callback,
                                final String apiUrl) {
-        new LoadNewsDetailTask(callback, context, apiUrl).execute();
+        new LoadNewsDetailTask(callback, apiUrl).execute();
     }
 
-    public void loadNewsDetailFromDB(final DetailNewsFromDBCallback callback, final Context context,
+    public void loadNewsDetailFromDB(final DetailNewsFromDBCallback callback,
+                                     final SoftReference<Context> context,
                                      final int newsId) {
         new LoadNewsDetailFromDBTask(callback, context, newsId).execute();
     }

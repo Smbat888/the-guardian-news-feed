@@ -1,6 +1,7 @@
 package smbat.com.newsfeed.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -89,10 +91,11 @@ public class NewsDetailActivity extends AppCompatActivity implements
         final NewsDataProvider dataProvider = NewsDataProvider.getInstance();
         if (null == apiUrl) {
             final int newsId = getIntent().getIntExtra(NewsAdapter.CURRENT_ITEM_ID, 0);
-            dataProvider.loadNewsDetailFromDB(this, this, newsId);
+            dataProvider.loadNewsDetailFromDB(this,
+                    new SoftReference<Context>(this), newsId);
             return;
         }
-        dataProvider.loadNewsDetail(this, this, apiUrl);
+        dataProvider.loadNewsDetail(this, apiUrl);
         sharedPreferences = getSharedPreferences(PINNED_NEWS_SHARED_PREF_KEY_FILE, MODE_PRIVATE);
     }
 

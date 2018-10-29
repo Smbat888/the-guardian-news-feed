@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,7 +121,7 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
             dataProvider.loadPinnedNews(this, this);
             return;
         }
-        dataProvider.loadNewsFromDB(this, this);
+        dataProvider.loadNewsFromDB(this, new SoftReference<Context>(this));
     }
 
     private void initializeNewsListView(final List<Result> newsList) {
@@ -180,4 +181,5 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
             }
         });
     }
+
 }
