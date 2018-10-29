@@ -19,7 +19,6 @@ public class NewsDataProvider {
     private static final Object lockObject = new Object();
 
     private NewsDataProvider() {
-
     }
 
     public static NewsDataProvider getInstance() {
@@ -62,7 +61,7 @@ public class NewsDataProvider {
     }
 
     public interface PinnedNewsCallback {
-        void onPinnedNewsLoaded(List<Result> newsList);
+        void onPinnedNewsLoaded(Result newPinnedNews);
     }
 
     public interface DetailNewsCallback {

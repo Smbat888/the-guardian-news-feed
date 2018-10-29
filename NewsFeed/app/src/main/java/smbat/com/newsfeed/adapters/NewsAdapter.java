@@ -111,18 +111,15 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsView
 
     class NewsViewHolder extends PinnedNewsViewHolder {
 
-        @BindView(R.id.news_title)
-        TextView newsTitle;
         @BindView(R.id.news_category)
         TextView newsCategory;
-        @BindView(R.id.news_image)
-        ImageView newsImage;
 
         NewsViewHolder(final LayoutInflater inflater, final ViewGroup parent) {
             super(inflater.inflate(R.layout.news_item, parent, false));
             ButterKnife.bind(this, itemView);
         }
 
+        @Override
         void bind(final Result news) {
             super.bind(news);
             newsCategory.setText(news.getSectionName());

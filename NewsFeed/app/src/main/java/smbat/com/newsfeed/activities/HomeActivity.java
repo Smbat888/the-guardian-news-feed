@@ -40,6 +40,9 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
 
     private boolean isInGridMode = false;
     private NewsAdapter newsListAdapter;
+    private NewsAdapter pinnedNewsAdapter;
+    private List<Result> pinnedList = new ArrayList<>();
+    private NewsDataProvider dataProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,30 +83,40 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
     @Override
     public void onNewsLoaded(final List<Result> newsList) {
         initializeNewsListView(newsList);
-        progressBar.setVisibility(View.GONE);
+        initializePinnedNewsListView();
         pinnedNewsRecyclerView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
     }
 
     @Override
     public void onNewsLoadedFromDB(List<News> newsList) {
         initializeNewsListViewFromDB(newsList);
-        pinnedNewsRecyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
     }
 
     @Override
-    public void onPinnedNewsLoaded(final List<Result> newsList) {
-        //initializePinnedNewsListView(newsList);
-        pinnedNewsRecyclerView.setVisibility(View.VISIBLE);
+    protected void onResume() {
+        super.onResume();
+        if (Utils.isNetworkAvailable(this)) {
+            pinnedList.clear();
+            dataProvider.loadPinnedNews(this, this);
+        }
+    }
+
+    @Override
+    public void onPinnedNewsLoaded(Result newPinnedNews) {
+        pinnedList.add(newPinnedNews);
+        if (null != pinnedNewsAdapter) {
+            pinnedNewsAdapter.notifyDataSetChanged();
+        }
     }
 
     /* Helper Methods */
 
     private void initializeDataProvider() {
-        final NewsDataProvider dataProvider = NewsDataProvider.getInstance();
+        dataProvider = NewsDataProvider.getInstance();
         if (Utils.isNetworkAvailable(this)) {
             dataProvider.loadNews(this);
-            // TODO - load pinned news
             dataProvider.loadPinnedNews(this, this);
             return;
         }
@@ -117,12 +130,12 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         newsRecyclerView.setAdapter(newsListAdapter);
     }
 
-    private void initializePinnedNewsListView(final List<Result> newsList) {
+    private void initializePinnedNewsListView() {
         pinnedNewsRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                 LinearLayoutManager.HORIZONTAL, false));
         pinnedNewsRecyclerView.setHasFixedSize(true);
-        final NewsAdapter newsAdapter = new NewsAdapter(this, newsList, true);
-        pinnedNewsRecyclerView.setAdapter(newsAdapter);
+        pinnedNewsAdapter = new NewsAdapter(this, pinnedList, true);
+        pinnedNewsRecyclerView.setAdapter(pinnedNewsAdapter);
     }
 
     private void initializeNewsListViewFromDB(final List<News> newsList) {
@@ -154,15 +167,15 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // filter recycler view when query submitted
                 newsListAdapter.getFilter().filter(query);
+                pinnedNewsAdapter.getFilter().filter(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String query) {
-                // filter recycler view when text is changed
                 newsListAdapter.getFilter().filter(query);
+                pinnedNewsAdapter.getFilter().filter(query);
                 return false;
             }
         });

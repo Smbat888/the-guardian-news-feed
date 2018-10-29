@@ -15,6 +15,7 @@
         android:layout_alignParentTop="true"
         android:clipToPadding="false"
         android:scrollbars="horizontal"
+        android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     <android.support.v7.widget.RecyclerView

@@ -1,6 +1,7 @@
 package smbat.com.newsfeed.activities;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,6 +32,11 @@ public class NewsDetailActivity extends AppCompatActivity implements
 
     private static final String NO_WEB_CONTENT_HTML = "file:///android_asset/noContent.html";
 
+    public static final String PINNED_NEWS_SHARED_PREF_KEY_FILE =
+            "smbat.com.newsfeed.activities.NewsDetailActivity.PINNED_NEWS_SHARED_PREF_KEY_FILE";
+    public static final String PINNED_ITEM_URL_KEY =
+            "smbat.com.newsfeed.activities.NewsDetailActivity.PINNED_ITEM_URL_KEY";
+
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.news_image)
@@ -45,6 +51,7 @@ public class NewsDetailActivity extends AppCompatActivity implements
     FloatingActionButton saveNewsButton;
     @BindView(R.id.pin_news)
     FloatingActionButton pinNewsButton;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,13 +86,14 @@ public class NewsDetailActivity extends AppCompatActivity implements
 
     private void initializeDataProvider() {
         final String apiUrl = getIntent().getStringExtra(NewsAdapter.CURRENT_ITEM_API_URL);
-        final int newsId = getIntent().getIntExtra(NewsAdapter.CURRENT_ITEM_ID, 0);
         final NewsDataProvider dataProvider = NewsDataProvider.getInstance();
         if (null == apiUrl) {
+            final int newsId = getIntent().getIntExtra(NewsAdapter.CURRENT_ITEM_ID, 0);
             dataProvider.loadNewsDetailFromDB(this, this, newsId);
             return;
         }
         dataProvider.loadNewsDetail(this, this, apiUrl);
+        sharedPreferences = getSharedPreferences(PINNED_NEWS_SHARED_PREF_KEY_FILE, MODE_PRIVATE);
     }
 
     private void initializeToolbar() {
@@ -124,6 +132,7 @@ public class NewsDetailActivity extends AppCompatActivity implements
                     Utils.saveNewsInDB(singleNews, NewsDetailActivity.this);
                     Toast.makeText(NewsDetailActivity.this,
                             R.string.news_saved_message, Toast.LENGTH_SHORT).show();
+                    saveNewsButton.setEnabled(false);
                 } catch (IOException e) {
                     Log.d("Failed To Save News", e.getLocalizedMessage());
                     Toast.makeText(NewsDetailActivity.this,
@@ -134,6 +143,8 @@ public class NewsDetailActivity extends AppCompatActivity implements
         pinNewsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                sharedPreferences.edit().putString(PINNED_ITEM_URL_KEY + singleNews.getId(), singleNews.getApiUrl()).apply();
+                pinNewsButton.setEnabled(false);
                 Toast.makeText(NewsDetailActivity.this,
                         R.string.news_pinned_message, Toast.LENGTH_SHORT).show();
             }
