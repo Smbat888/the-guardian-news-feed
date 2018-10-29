@@ -14,7 +14,8 @@ public interface NewsClient {
             // API key should always be constant
             @Query("api-key") String apiKey,
             // For getting thumbnail image
-            @Query("show-fields") String fields);
+            @Query("show-fields") String fields,
+            @Query("page") int page);
 
     @GET
     Call<SingleNews> getSingleNewsJson(

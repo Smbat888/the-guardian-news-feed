@@ -30,6 +30,8 @@ import smbat.com.newsfeed.utils.Utils;
 public class HomeActivity extends AppCompatActivity implements NewsDataProvider.NewsCallback,
         NewsDataProvider.PinnedNewsCallback, NewsDataProvider.NewsFromDBCallback {
 
+    private static final int PAGE_SIZE = 6;
+
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.progress)
@@ -43,7 +45,9 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
     private NewsAdapter newsListAdapter;
     private NewsAdapter pinnedNewsAdapter;
     private List<Result> pinnedList = new ArrayList<>();
+    private List<Result> newsList = new ArrayList<>();
     private NewsDataProvider dataProvider;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,9 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         initializeDataProvider();
+        initializeNewsListView();
+        initializePinnedNewsListView();
+        pinnedNewsRecyclerView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -67,13 +74,14 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_view_list) {
             if (isInGridMode) {
-                newsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+                newsRecyclerView.setLayoutManager(layoutManager);
                 item.setIcon(R.drawable.ic_list);
                 isInGridMode = false;
                 return true;
             }
-            newsRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,
-                    StaggeredGridLayoutManager.VERTICAL));
+            layoutManager = new StaggeredGridLayoutManager(2,
+                    StaggeredGridLayoutManager.VERTICAL);
+            newsRecyclerView.setLayoutManager(layoutManager);
             item.setIcon(R.drawable.ic_grid);
             isInGridMode = true;
             return true;
@@ -82,10 +90,11 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
     }
 
     @Override
-    public void onNewsLoaded(final List<Result> newsList) {
-        initializeNewsListView(newsList);
-        initializePinnedNewsListView();
-        pinnedNewsRecyclerView.setVisibility(View.VISIBLE);
+    public void onNewsLoaded(final List<Result> newNewsList) {
+        newsList.addAll(newNewsList);
+        if (null != newsListAdapter) {
+            newsListAdapter.notifyDataSetChanged();
+        }
         progressBar.setVisibility(View.GONE);
     }
 
@@ -124,11 +133,13 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         dataProvider.loadNewsFromDB(this, new SoftReference<Context>(this));
     }
 
-    private void initializeNewsListView(final List<Result> newsList) {
-        newsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+    private void initializeNewsListView() {
+        layoutManager = new LinearLayoutManager(this);
+        newsRecyclerView.setLayoutManager(layoutManager);
         newsRecyclerView.setHasFixedSize(true);
         newsListAdapter = new NewsAdapter(this, newsList);
         newsRecyclerView.setAdapter(newsListAdapter);
+        newsRecyclerView.addOnScrollListener(recyclerViewOnScrollListener);
     }
 
     private void initializePinnedNewsListView() {
@@ -181,5 +192,34 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
             }
         });
     }
+
+    private RecyclerView.OnScrollListener recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+            final int visibleItemCount = layoutManager.getChildCount();
+            final int totalItemCount = layoutManager.getItemCount();
+            int firstVisibleItemPosition = 0;
+            if (layoutManager instanceof LinearLayoutManager) {
+                firstVisibleItemPosition =
+                        ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
+            } else {
+                final int[] positions = new int[2];
+                ((StaggeredGridLayoutManager) layoutManager).findFirstVisibleItemPositions(positions);
+                firstVisibleItemPosition = positions[0];
+            }
+            if((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                    && firstVisibleItemPosition >= 0
+                    && totalItemCount >= PAGE_SIZE) {
+                // TODO - dataProvider.loadNews*(...)
+                dataProvider.loadNews(HomeActivity.this);
+            }
+        }
+    };
 
 }

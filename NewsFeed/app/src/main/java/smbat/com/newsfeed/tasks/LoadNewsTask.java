@@ -18,18 +18,22 @@ import smbat.com.newsfeed.providers.NewsDataProvider;
 
 public class LoadNewsTask extends AsyncTask<Void, Void, List<Result>>  {
 
+    private static int pageSize = 0;
+
     private final NewsDataProvider.NewsCallback callback;
     private List<Result> results;
 
     public LoadNewsTask(final NewsDataProvider.NewsCallback callback) {
         this.callback = callback;
+        pageSize++;
     }
 
     @Override
     protected List<Result> doInBackground(Void... voids) {
         // Create a Retrofit client with the ServiceGenerator class
         final NewsClient client = ServiceGenerator.createService(NewsClient.class);
-        final Call<News> call = client.getBaseJson(Constants.API_KEY, Constants.SHOW_FIELDS_THUMBNAIL);
+        final Call<News> call =
+                client.getBaseJson(Constants.API_KEY, Constants.SHOW_FIELDS_THUMBNAIL, pageSize);
         // Call the endpoint and respond to failure and success events
         call.enqueue(new Callback<News>() {
             @Override
