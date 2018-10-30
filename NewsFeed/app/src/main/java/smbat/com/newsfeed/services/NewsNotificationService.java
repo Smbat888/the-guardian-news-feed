@@ -17,6 +17,10 @@ import smbat.com.newsfeed.activities.HomeActivity;
 import smbat.com.newsfeed.constants.Constants;
 import smbat.com.newsfeed.providers.NewsDataProvider;
 
+/**
+ * Service to check new news availability and send notification. This service runs on background or
+ * when app is killed.
+ */
 public class NewsNotificationService extends Service implements NewsDataProvider.NewsNotificationCallback {
 
     private static final String NEW_NEWS_SIZE_KEY_FILE =
@@ -38,6 +42,7 @@ public class NewsNotificationService extends Service implements NewsDataProvider
     };
 
     public NewsNotificationService() {
+        // Empty require constructor
     }
 
     @Override
@@ -69,6 +74,9 @@ public class NewsNotificationService extends Service implements NewsDataProvider
 
     /* Helper Methods */
 
+    /**
+     * Generates and sends notification to inform about new news availability.
+     */
     private void sendNotification() {
         final Intent intent = new Intent(this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -86,6 +94,9 @@ public class NewsNotificationService extends Service implements NewsDataProvider
         notificationManager.notify(NOTIFICATION_CODE, builder.build());
     }
 
+    /**
+     * Restarts the service after 1 second when app closes.
+     */
     private void restartServiceOnAppClose() {
         final Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
         restartServiceIntent.setPackage(getPackageName());

@@ -86,6 +86,9 @@ public class NewsDetailActivity extends AppCompatActivity implements
 
     /* Helper Methods */
 
+    /**
+     * Initializes data provider for getting available news.
+     */
     private void initializeDataProvider() {
         final String apiUrl = getIntent().getStringExtra(NewsAdapter.CURRENT_ITEM_API_URL);
         final NewsDataProvider dataProvider = NewsDataProvider.getInstance();
@@ -99,6 +102,9 @@ public class NewsDetailActivity extends AppCompatActivity implements
         sharedPreferences = getSharedPreferences(PINNED_NEWS_SHARED_PREF_KEY_FILE, MODE_PRIVATE);
     }
 
+    /**
+     * Initializes action bar and toolbar.
+     */
     private void initializeToolbar() {
         toolbar.setTitle(null);
         setSupportActionBar(toolbar);
@@ -107,6 +113,11 @@ public class NewsDetailActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Initializes UI elements using data from API request.
+     *
+     * @param singleNews For bind views data from single news
+     */
     @SuppressLint("SetJavaScriptEnabled")
     private void initializeUI(final Content singleNews) {
         Picasso.get()
@@ -120,6 +131,11 @@ public class NewsDetailActivity extends AppCompatActivity implements
         handleButtonsClick(singleNews);
     }
 
+    /**
+     * Initializes UI elements using data from database.
+     *
+     * @param singleNews For bind views data from single news
+     */
     private void initializeUIFromDB(final News singleNews) {
         newsImage.setImageBitmap(Utils.getBitmapFromBytes(singleNews.getNewsImage()));
         newsTitle.setText(singleNews.getNewsTitle());
@@ -127,6 +143,12 @@ public class NewsDetailActivity extends AppCompatActivity implements
         newsWebContent.loadUrl(NO_WEB_CONTENT_HTML);
     }
 
+
+    /**
+     * Handles "save in database" and "pin in home screen" buttons click and corresponding logic.
+     *
+     * @param singleNews For accessing specified news data
+     */
     private void handleButtonsClick(final Content singleNews) {
         saveNewsButton.setOnClickListener(new View.OnClickListener() {
             @Override

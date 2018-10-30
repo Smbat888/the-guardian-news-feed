@@ -11,7 +11,9 @@ import smbat.com.newsfeed.database.AppDataBase;
 import smbat.com.newsfeed.database.entities.News;
 import smbat.com.newsfeed.providers.NewsDataProvider;
 
-
+/**
+ * Task to load news from database for application offline support.
+ */
 public class LoadNewsFromDBTask extends AsyncTask<Void, Void, List<News>> {
 
     private final NewsDataProvider.NewsFromDBCallback callback;

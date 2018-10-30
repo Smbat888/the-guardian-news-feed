@@ -15,6 +15,9 @@ import smbat.com.newsfeed.api.models.SingleNews;
 import smbat.com.newsfeed.constants.Constants;
 import smbat.com.newsfeed.providers.NewsDataProvider;
 
+/**
+ * Task to load news detailed information (content) by calling API request for specified news.
+ */
 public class LoadNewsDetailTask extends AsyncTask<Void, Void, Result> {
 
     private final NewsDataProvider.DetailNewsCallback callback;

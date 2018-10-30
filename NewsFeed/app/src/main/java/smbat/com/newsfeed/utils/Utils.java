@@ -23,6 +23,9 @@ import smbat.com.newsfeed.api.models.Content;
 import smbat.com.newsfeed.database.AppDataBase;
 import smbat.com.newsfeed.database.entities.News;
 
+/**
+ * General utilities class
+ */
 public class Utils {
 
     private static final int TEXT_SUMMARY_POSITION_IN_BODY = 0;
@@ -31,6 +34,13 @@ public class Utils {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Saves passed news in database for app offline supporting
+     *
+     * @param newsContent News to save
+     * @param context     For accessing database instance
+     * @throws IOException When a problem occurs while processing image bytes strem
+     */
     public static void saveNewsInDB(final Content newsContent,
                                     final Context context) throws IOException {
         final AppDataBase appDataBase = AppDataBase.getAppDatabase(context);
@@ -43,6 +53,12 @@ public class Utils {
         appDataBase.newsDao().insert(newsForSave);
     }
 
+    /**
+     * Checks is network available
+     *
+     * @param context For accessing connectivity manager to detect network availability
+     * @return true - when network is available, false - vice versa
+     */
     public static boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivity =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -61,6 +77,13 @@ public class Utils {
         return false;
     }
 
+    /**
+     * Gets news image bytes from url. This is require for saving image in database via Blob.
+     *
+     * @param newsForSave News to save
+     * @param thumbnailUrl News image url to download
+     * @throws IOException when processing response body
+     */
     private static void getImageBytes(final News newsForSave,
                                       final String thumbnailUrl) throws IOException {
         final OkHttpClient client = new OkHttpClient();
@@ -83,10 +106,19 @@ public class Utils {
         }
     }
 
+    /**
+     * Gets bitmap from passed image bytes
+     *
+     * @param imageBytes Bytes to decode
+     * @return Decoded bitmap from image bytes
+     */
     public static Bitmap getBitmapFromBytes(final byte[] imageBytes) {
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
+    /**
+     * Callback for making request call synchronous and wait for response
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     static class CallbackFuture extends CompletableFuture<Response> implements Callback {
         public void onResponse(@NonNull Call call, @NonNull Response response) {

@@ -4,6 +4,9 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+/**
+ * News Entity (alternative fot table) for saving news detailed info into database
+ */
 @Entity(tableName = "news")
 public class News {
 

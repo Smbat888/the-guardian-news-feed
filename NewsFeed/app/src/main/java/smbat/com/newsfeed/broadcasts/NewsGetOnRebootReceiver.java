@@ -7,6 +7,9 @@ import android.content.Intent;
 
 import smbat.com.newsfeed.services.NewsNotificationService;
 
+/**
+ * Broadcast receiver for restart news notification service on device reboot.
+ */
 public class NewsGetOnRebootReceiver extends BroadcastReceiver {
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     @Override

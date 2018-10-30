@@ -29,6 +29,9 @@ import smbat.com.newsfeed.database.AppDataBase;
 import smbat.com.newsfeed.utils.UIUtils;
 import smbat.com.newsfeed.utils.Utils;
 
+/**
+ * News Adapter for showing data in recycler view for usual news and pinned news.
+ */
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsViewHolder> implements Filterable {
 
     public static final String CURRENT_ITEM_API_URL = "smbat.com.newsfeed.adapters.CURRENT_ITEM_API_URL";
@@ -120,6 +123,9 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsView
             ButterKnife.bind(this, itemView);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         void bind(final Result news) {
             super.bind(news);
@@ -147,6 +153,11 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsView
             ButterKnife.bind(this, itemView);
         }
 
+        /**
+         * Binds holder views by news data from specified position.
+         *
+         * @param news For getting specified news data
+         */
         void bind(final Result news) {
             newsTitle.setText(news.getWebTitle());
             bindImage(this, news);
@@ -155,6 +166,14 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsView
 
          /* Helper Methods */
 
+        /**
+         * Gets view holder click listener, makes shared views transitions, data passing and opens
+         * new detailed activity.
+         *
+         * @param holder For getting adapter position and access views transitions
+         * @param apiUrl For passing specified news's api url into Detail screen.
+         * @return On recycler view holder click listener
+         */
         private View.OnClickListener getOnItemClickListener(final PinnedNewsViewHolder holder,
                                                             final String apiUrl) {
             return new View.OnClickListener() {
@@ -182,6 +201,13 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsView
             };
         }
 
+        /**
+         * Binds image from database if api url is null and from request using Picasso image download
+         * library - otherwise.
+         *
+         * @param holder For accessing holder's image view
+         * @param news   For getting api url or image bytes.
+         */
         private void bindImage(final PinnedNewsViewHolder holder, final Result news) {
             if (null == news.getFields()) {
                 if (null != news.getImageBytes()) {

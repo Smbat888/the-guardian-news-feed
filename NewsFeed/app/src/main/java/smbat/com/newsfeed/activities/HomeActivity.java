@@ -148,13 +148,16 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && !isInGridMode) {
             makeGridMode();
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT && isInGridMode){
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT && isInGridMode) {
             makeListMode();
         }
     }
 
     /* Helper Methods */
 
+    /**
+     * Initializes data provider for getting available news.
+     */
     private void initializeDataProvider() {
         dataProvider = NewsDataProvider.getInstance();
         if (Utils.isNetworkAvailable(this)) {
@@ -165,11 +168,17 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         dataProvider.loadNewsFromDB(this, new SoftReference<Context>(this));
     }
 
+    /**
+     * Starts news foreground service for getting new added news immediately.
+     */
     private void startNewsService() {
         final Intent intent = new Intent(this, NewsService.class);
         startService(intent);
     }
 
+    /**
+     * Initializes news list view using data from API request.
+     */
     private void initializeNewsListView() {
         layoutManager = new LinearLayoutManager(this);
         newsRecyclerView.setLayoutManager(layoutManager);
@@ -179,6 +188,9 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         newsRecyclerView.addOnScrollListener(recyclerViewOnScrollListener);
     }
 
+    /**
+     * Initializes pinned news list view using data from API request and shared prefs.
+     */
     private void initializePinnedNewsListView() {
         pinnedNewsRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                 LinearLayoutManager.HORIZONTAL, false));
@@ -187,6 +199,11 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         pinnedNewsRecyclerView.setAdapter(pinnedNewsAdapter);
     }
 
+    /**
+     * Initializes news list view using data from database.
+     *
+     * @param newsList news list to iterate and fill adapter
+     */
     private void initializeNewsListViewFromDB(final List<News> newsList) {
         newsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         newsRecyclerView.setHasFixedSize(true);
@@ -203,6 +220,12 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         newsRecyclerView.setAdapter(newsListAdapter);
     }
 
+    /**
+     * Initializes search view and listened search query changes, makes filter over news and
+     * pinned news lists.
+     *
+     * @param menu toolbar's menu search item
+     */
     private void initializeSearchView(final Menu menu) {
         final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         final SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
@@ -230,6 +253,9 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         });
     }
 
+    /**
+     * Makes news list view grid mode.
+     */
     private void makeGridMode() {
         layoutManager = new StaggeredGridLayoutManager(2,
                 StaggeredGridLayoutManager.VERTICAL);
@@ -238,6 +264,9 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         isInGridMode = true;
     }
 
+    /**
+     * Makes news list view ordinal list mode.
+     */
     private void makeListMode() {
         layoutManager = new LinearLayoutManager(this);
         newsRecyclerView.setLayoutManager(layoutManager);
@@ -245,6 +274,10 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         isInGridMode = false;
     }
 
+    /**
+     * Listener for handling recycler view position changing and makes new API requests for
+     * receiving new news data (pagination).
+     */
     private RecyclerView.OnScrollListener recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
 
         @Override
@@ -261,7 +294,7 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
                 ((StaggeredGridLayoutManager) layoutManager).findFirstVisibleItemPositions(positions);
                 firstVisibleItemPosition = positions[0];
             }
-            if((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+            if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                     && firstVisibleItemPosition >= 0
                     && totalItemCount >= PAGE_SIZE) {
                 dataProvider.loadNews(HomeActivity.this);

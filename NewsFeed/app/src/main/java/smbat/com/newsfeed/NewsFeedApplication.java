@@ -27,7 +27,7 @@ public class NewsFeedApplication extends Application implements Application.Acti
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
+        // Required implementation
     }
 
     @Override
@@ -40,12 +40,12 @@ public class NewsFeedApplication extends Application implements Application.Acti
 
     @Override
     public void onActivityResumed(Activity activity) {
-
+        // Required implementation
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
-
+        // Required implementation
     }
 
     @Override
@@ -59,17 +59,21 @@ public class NewsFeedApplication extends Application implements Application.Acti
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
+        // Required implementation
     }
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-
+        // Required implementation
     }
 
      /* Helper Methods */
 
-    private void createNotificationChannel() {
+    /**
+     * Creates notification chanel for receiving updated news notification via already opened chanel
+     * This is require only for Android devices higher than Android.O
+     */
+     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             final CharSequence name = getString(R.string.channel_name);
             final String description = getString(R.string.channel_description);

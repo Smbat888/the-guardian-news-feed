@@ -1,6 +1,8 @@
 package smbat.com.newsfeed.constants;
 
-
+/**
+ * General Constants class
+ */
 public class Constants {
 
     public static final String API_KEY = "test";

@@ -8,6 +8,9 @@ import android.content.Context;
 import smbat.com.newsfeed.database.dao.NewsDao;
 import smbat.com.newsfeed.database.entities.News;
 
+/**
+ * Designs news database and opens access to database.
+ */
 @Database(entities = {News.class}, version = 1, exportSchema = false)
 public abstract class AppDataBase extends RoomDatabase {
 
@@ -15,9 +18,14 @@ public abstract class AppDataBase extends RoomDatabase {
 
     private static AppDataBase instance;
 
-
     public abstract NewsDao newsDao();
 
+    /**
+     * Gets news database (designed using Room architecture).
+     *
+     * @param context For accessing application context
+     * @return News database
+     */
     public static AppDataBase getAppDatabase(final Context context) {
         if (instance == null) {
             instance = Room.databaseBuilder(context.getApplicationContext(),

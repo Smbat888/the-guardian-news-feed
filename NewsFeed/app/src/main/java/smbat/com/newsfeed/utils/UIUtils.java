@@ -10,6 +10,9 @@ import android.util.Log;
 
 import smbat.com.newsfeed.R;
 
+/**
+ * General UI utilities class
+ */
 public class UIUtils {
 
     private static final String HEX_COLOR_FORMATTER = "#%X";
@@ -18,6 +21,13 @@ public class UIUtils {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets randomly colorized background drawable
+     *
+     * @param sectionName News section name to generate color value from
+     * @param context For getting drawable from ContextCompat
+     * @return Colorized drawable - if color has generated successfully, old one - otherwise
+     */
     public static Drawable getRandomColoredDrawable(final String sectionName,
                                                     final Context context) {
         final Drawable drawable =

@@ -8,6 +8,9 @@ import android.arch.persistence.room.Update;
 
 import smbat.com.newsfeed.database.entities.News;
 
+/**
+ * News DAO model for queering from/to database.
+ */
 @Dao
 public interface NewsDao {
 

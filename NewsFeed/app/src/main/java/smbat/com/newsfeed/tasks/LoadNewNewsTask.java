@@ -13,6 +13,9 @@ import smbat.com.newsfeed.api.models.News;
 import smbat.com.newsfeed.constants.Constants;
 import smbat.com.newsfeed.providers.NewsDataProvider;
 
+/**
+ * Task to check is new news are available by calling API request and comparing page total size.
+ */
 public class LoadNewNewsTask extends AsyncTask<Void, Void, Integer> {
 
     private static final int FIRST_PAGE = 1;

@@ -12,6 +12,10 @@ import smbat.com.newsfeed.api.models.Result;
 import smbat.com.newsfeed.constants.Constants;
 import smbat.com.newsfeed.providers.NewsDataProvider;
 
+/**
+ * Service to check new news availability and send broadcast to Home screen for getting available
+ * information. This service runs on foreground.
+ */
 public class NewsService extends Service implements NewsDataProvider.NewsCallback{
 
     public static final String NEWS_LOADED_INTENT_ACTION = "NEW_NEWS_LOADING_ACTION";
@@ -27,6 +31,7 @@ public class NewsService extends Service implements NewsDataProvider.NewsCallbac
     };
 
     public NewsService() {
+        // Empty require constructor
     }
 
     @Override

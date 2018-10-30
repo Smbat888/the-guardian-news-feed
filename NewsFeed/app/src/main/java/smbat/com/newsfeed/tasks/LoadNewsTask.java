@@ -16,6 +16,9 @@ import smbat.com.newsfeed.api.models.Result;
 import smbat.com.newsfeed.constants.Constants;
 import smbat.com.newsfeed.providers.NewsDataProvider;
 
+/**
+ * Task to load news by calling API requests according to pagination.
+ */
 public class LoadNewsTask extends AsyncTask<Void, Void, List<Result>>  {
 
     private static int pageSize = 0;
@@ -30,15 +33,12 @@ public class LoadNewsTask extends AsyncTask<Void, Void, List<Result>>  {
 
     @Override
     protected List<Result> doInBackground(Void... voids) {
-        // Create a Retrofit client with the ServiceGenerator class
         final NewsClient client = ServiceGenerator.createService(NewsClient.class);
         final Call<News> call =
                 client.getBaseJson(Constants.API_KEY, Constants.SHOW_FIELDS_THUMBNAIL, pageSize);
-        // Call the endpoint and respond to failure and success events
         call.enqueue(new Callback<News>() {
             @Override
             public void onResponse(@NonNull Call<News> call, @NonNull Response<News> response) {
-                // Parse the response to match the List of JSONArray objects
                 final News body = response.body();
                 if (null == body) {
                     return;

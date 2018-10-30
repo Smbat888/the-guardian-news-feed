@@ -9,6 +9,10 @@ import smbat.com.newsfeed.database.AppDataBase;
 import smbat.com.newsfeed.database.entities.News;
 import smbat.com.newsfeed.providers.NewsDataProvider;
 
+/**
+ * Task to load news news detailed information (content) from database for application
+ * offline support.
+ */
 public class LoadNewsDetailFromDBTask extends AsyncTask<Void, Void, News> {
 
     private final NewsDataProvider.DetailNewsFromDBCallback callback;
