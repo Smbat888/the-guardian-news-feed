@@ -26,6 +26,7 @@ import smbat.com.newsfeed.activities.HomeActivity;
 import smbat.com.newsfeed.activities.NewsDetailActivity;
 import smbat.com.newsfeed.api.models.Result;
 import smbat.com.newsfeed.database.AppDataBase;
+import smbat.com.newsfeed.utils.UIUtils;
 import smbat.com.newsfeed.utils.Utils;
 
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsViewHolder> implements Filterable {
@@ -122,7 +123,9 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsView
         @Override
         void bind(final Result news) {
             super.bind(news);
-            newsCategory.setText(news.getSectionName());
+            final String category = news.getSectionName();
+            newsCategory.setText(category);
+            newsCategory.setBackground(UIUtils.getRandomColoredDrawable(category, context));
         }
 
     }
@@ -149,49 +152,49 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.PinnedNewsView
             bindImage(this, news);
             itemView.setOnClickListener(getOnItemClickListener(this, news.getApiUrl()));
         }
-    }
 
+         /* Helper Methods */
 
-    /* Helper Methods */
-
-    private View.OnClickListener getOnItemClickListener(final PinnedNewsViewHolder holder,
-                                                        final String apiUrl) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final Intent intent = new Intent(context, NewsDetailActivity.class);
-                if (Utils.isNetworkAvailable(context)) {
-                    intent.putExtra(CURRENT_ITEM_API_URL, apiUrl);
-                } else {
-                    final String title =
-                            newsListFiltered.get(holder.getAdapterPosition()).getWebTitle();
-                    final AppDataBase appDataBase = AppDataBase.getAppDatabase(context);
-                    final int newsId = appDataBase.newsDao().getNewsIdByTitle(title);
-                    intent.putExtra(CURRENT_ITEM_ID, newsId);
+        private View.OnClickListener getOnItemClickListener(final PinnedNewsViewHolder holder,
+                                                            final String apiUrl) {
+            return new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    final Intent intent = new Intent(context, NewsDetailActivity.class);
+                    if (Utils.isNetworkAvailable(context)) {
+                        intent.putExtra(CURRENT_ITEM_API_URL, apiUrl);
+                    } else {
+                        final String title =
+                                newsListFiltered.get(holder.getAdapterPosition()).getWebTitle();
+                        final AppDataBase appDataBase = AppDataBase.getAppDatabase(context);
+                        final int newsId = appDataBase.newsDao().getNewsIdByTitle(title);
+                        intent.putExtra(CURRENT_ITEM_ID, newsId);
+                    }
+                    final Pair<View, String> pairImage =
+                            Pair.create((View) holder.newsImage, IMAGE_TRANSITION_NAME);
+                    final Pair<View, String> pairTitle =
+                            Pair.create((View) holder.newsTitle, TEXT_TRANSITION_NAME);
+                    @SuppressWarnings("unchecked") final ActivityOptionsCompat optionsCompat =
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                    (HomeActivity) context, pairImage, pairTitle);
+                    context.startActivity(intent, optionsCompat.toBundle());
                 }
-                final Pair<View, String> pairImage =
-                        Pair.create((View) holder.newsImage, IMAGE_TRANSITION_NAME);
-                final Pair<View, String> pairTitle =
-                        Pair.create((View) holder.newsTitle, TEXT_TRANSITION_NAME);
-                @SuppressWarnings("unchecked") final ActivityOptionsCompat optionsCompat =
-                        ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                (HomeActivity) context, pairImage, pairTitle);
-                context.startActivity(intent, optionsCompat.toBundle());
+            };
+        }
+
+        private void bindImage(final PinnedNewsViewHolder holder, final Result news) {
+            if (null == news.getFields()) {
+                if (null != news.getImageBytes()) {
+                    holder.newsImage.setImageBitmap(Utils.getBitmapFromBytes(news.getImageBytes()));
+                }
+                return;
             }
-        };
+            final String thumbnailImage = news.getFields().getThumbnail();
+            Picasso.get()
+                    .load(thumbnailImage)
+                    .placeholder(R.drawable.news_image_placeholder)
+                    .into(holder.newsImage);
+        }
     }
 
-    private void bindImage(final PinnedNewsViewHolder holder, final Result news) {
-        if (null == news.getFields()) {
-            if (null != news.getImageBytes()) {
-                holder.newsImage.setImageBitmap(Utils.getBitmapFromBytes(news.getImageBytes()));
-            }
-            return;
-        }
-        final String thumbnailImage = news.getFields().getThumbnail();
-        Picasso.get()
-                .load(thumbnailImage)
-                .placeholder(R.drawable.news_image_placeholder)
-                .into(holder.newsImage);
-    }
 }

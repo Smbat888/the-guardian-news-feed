@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -55,6 +56,7 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
     private List<Result> newsList = new ArrayList<>();
     private NewsDataProvider dataProvider;
     private RecyclerView.LayoutManager layoutManager;
+    private MenuItem listModeMenuItem;
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -80,6 +82,7 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
+        listModeMenuItem = menu.findItem(R.id.action_view_list);
         initializeSearchView(menu);
         return true;
     }
@@ -90,17 +93,10 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_view_list) {
             if (isInGridMode) {
-                layoutManager = new LinearLayoutManager(this);
-                newsRecyclerView.setLayoutManager(layoutManager);
-                item.setIcon(R.drawable.ic_list);
-                isInGridMode = false;
+                makeListMode();
                 return true;
             }
-            layoutManager = new StaggeredGridLayoutManager(2,
-                    StaggeredGridLayoutManager.VERTICAL);
-            newsRecyclerView.setLayoutManager(layoutManager);
-            item.setIcon(R.drawable.ic_grid);
-            isInGridMode = true;
+            makeGridMode();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -143,6 +139,17 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         pinnedList.add(newPinnedNews);
         if (null != pinnedNewsAdapter) {
             pinnedNewsAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && !isInGridMode) {
+            makeGridMode();
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT && isInGridMode){
+            makeListMode();
         }
     }
 
@@ -196,7 +203,7 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
         newsRecyclerView.setAdapter(newsListAdapter);
     }
 
-    private void initializeSearchView(Menu menu) {
+    private void initializeSearchView(final Menu menu) {
         final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         final SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
                 .getActionView();
@@ -221,6 +228,21 @@ public class HomeActivity extends AppCompatActivity implements NewsDataProvider.
                 return false;
             }
         });
+    }
+
+    private void makeGridMode() {
+        layoutManager = new StaggeredGridLayoutManager(2,
+                StaggeredGridLayoutManager.VERTICAL);
+        newsRecyclerView.setLayoutManager(layoutManager);
+        listModeMenuItem.setIcon(R.drawable.ic_grid);
+        isInGridMode = true;
+    }
+
+    private void makeListMode() {
+        layoutManager = new LinearLayoutManager(this);
+        newsRecyclerView.setLayoutManager(layoutManager);
+        listModeMenuItem.setIcon(R.drawable.ic_list);
+        isInGridMode = false;
     }
 
     private RecyclerView.OnScrollListener recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
